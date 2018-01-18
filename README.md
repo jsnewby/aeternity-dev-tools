@@ -12,7 +12,7 @@ This script is intended to be called from your .bashrc like this:
 
 It will parse your `epoch.yaml` (clumsily, needs improvement), and set the environment variables `AE_LOCAL_PORT` and `AE_LOCAL_INTERNAL_PORT`. It has a dependency on [jq] (https://stedolan.github.io/jq/).
 
-### unctions and aliases provided, variables exported
+### Functions and aliases provided, variables exported
 
 `aepub_key` calls the internal port and parses the result, returning the public key.
 `aeupdate_pub_key` exports the result of calling `aepub_key` into the variable `AE_PUB_KEY`.
