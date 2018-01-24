@@ -21,7 +21,8 @@ make
 ## Step 3 -- edit `accounts.json`
 
 For the Test Net, 
-```{
+```
+{
   "ak$3YGRJv1QMgNbeDzvqX7qJrZWJDaHGmrHYHifxSbhSEgn6anuNYCNPrzsB911xTbZ35bvJYWLyYjrQaQKfvja9gkpvYMfEZ": 100000000001
 }
 ```
@@ -32,7 +33,8 @@ What goes in here?
 
 Replace the contents of `_build/local/rel/epoch/doc/examples/epoch.yaml` with the following, replacing /var/epoch with the path to your build dir, and peer_address with your external IP address.
 
-```---
+```
+---
 peers:
     - "http://31.13.248.108:3013/"
 
@@ -61,14 +63,16 @@ chain:
 	
 ## Step 4 -- create directories for key and db
 
-```mkdir _build/local/rel/epoch/key _build/local/rel/epoch/mydb
+```
+mkdir _build/local/rel/epoch/key _build/local/rel/epoch/mydb
 ```
 
 ## Step 5 -- install accounts.json
 
 The file contains the hash of the genesis block, and it is important it matches that of the peer. For the peer above, the file should contain:
 
-```{
+```
+{
    "ak$3YGRJv1QMgNbeDzvqX7qJrZWJDaHGmrHYHifxSbhSEgn6anuNYCNPrzsB911xTbZ35bvJYWLyYjrQaQKfvja9gkpvYMfEZ": 100000000001
 }
 ```
