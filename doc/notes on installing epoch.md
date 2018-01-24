@@ -8,20 +8,23 @@ Don't use the Ubuntu-provided packages. They cause compile errors.
 sudo dpkg -i erlang-solutions_1.0_all.deb
 sudo apt-get update
 sudo apt-get install esl-erlang
-rm erlang-solutions_1.0_all.deb```
+rm erlang-solutions_1.0_all.deb
+```
 
 ## Step 2 -- get the source, and compile it
 
 ```git clone git@github.com:aeternity/epoch.git
 cd epoch/
-make```
+make
+```
 
 ## Step 3 -- edit `accounts.json`
 
 For the Test Net, 
 ```{
-	"BKSRJ6RvBkUhW51L15s0v1LyhbLRZndE8RNAWy3BjonpcwZv+7yRYYQ567v7y2aRMwg1Jibue8fwe5SLX3ekArc=": 100000000000001
-}```
+  "ak$3YGRJv1QMgNbeDzvqX7qJrZWJDaHGmrHYHifxSbhSEgn6anuNYCNPrzsB911xTbZ35bvJYWLyYjrQaQKfvja9gkpvYMfEZ": 100000000001
+}
+```
 
 What goes in here?
 
@@ -53,20 +56,22 @@ mining:
 
 chain:
     persist: true
-    db_path: ./mydb```
+    db_path: ./mydb
+	```
 	
 ## Step 4 -- create directories for key and db
 
-```mkdir _build/local/rel/epoch/key _build/local/rel/epoch/mydb```
+```mkdir _build/local/rel/epoch/key _build/local/rel/epoch/mydb
+```
 
 ## Step 5 -- install accounts.json
 
 The file contains the hash of the genesis block, and it is important it matches that of the peer. For the peer above, the file should contain:
 
 ```{
-    "BGWkAh1FRpNiuL+v01pVjEX0AqchlwJycm53A6MILswKEwuhZqV6KkcJwc5ilxhdRnNGWlXCy+Q6EFnbPAZp8MM=": 100000000001
-    
-}```
+   "ak$3YGRJv1QMgNbeDzvqX7qJrZWJDaHGmrHYHifxSbhSEgn6anuNYCNPrzsB911xTbZ35bvJYWLyYjrQaQKfvja9gkpvYMfEZ": 100000000001
+}
+```
 
 If this does not match what the peer is expecting, your node will be blocked, and you'll have to change the peer's address (port number only will do) in order to connect. 
 
