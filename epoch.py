@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 """
-Test oracle client
+Class encapsulating epoch calls
 Author: John Newby
 
 (c) Ape Unit 2018
