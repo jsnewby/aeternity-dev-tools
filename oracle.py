@@ -8,6 +8,7 @@ Author: John Newby
 """
 
 import asyncio
+from epoch import Epoch
 import json
 import os
 from websocket import create_connection
@@ -19,6 +20,7 @@ class Oracle:
         self.websocket = None
         self.local_port = os.environ['AE_LOCAL_PORT']
         self.local_internal_port = os.environ['AE_LOCAL_INTERNAL_PORT']
+        self.epoch = Epoch()
 
     def connect_websocket(self):
         if not self.websocket:
@@ -39,20 +41,18 @@ class Oracle:
                                "fee": int(fee) } }
         j = json.dumps(query)
         print(j)
+        self.epoch.update_top_block()
         self.websocket.send(j)
         response = json.loads(self.websocket.recv())
         if not response['payload']['result'] == "ok":
             raise RuntimeError(response)
         oracle_id = response['payload']['oracle_id']
+        self.epoch.wait_for_block()
         return oracle_id
 
-    def wait_for_mining_event(self):
-        while True:
-            print("Waiting for block to be mined")
-            j = self.websocket.recv()
-            response = json.loads(j)
-            if response['action'] == "mined_block":
-                break
+    def wait_for_block(self):
+        self.epoch.update_top_block()
+        self.epoch.wait_for_block()
             
     def subscribe(self, oracle_id, callback = None):
         self.connect_websocket()
@@ -67,17 +67,21 @@ class Oracle:
         if not response['payload']['result'] == 'ok':
             raise RuntimeError(response)
         id = response['payload']['subscribed_to']['oracle_id']
+        mining_events = 0
         while True:
             data = self.websocket.recv()
             j = json.loads(data)
             print(j)
             if j['action'] == 'mined_block':
+                mining_events += 1
                 next
             if j['action'] == 'new_oracle_query':
                 if callback:
                     callback(j)
             else:
                 print("Unhandled")
+        if mining_events == 0:
+            self.epoch.wait_for_block()
         
     def query(self, oracle_pubkey, query_fee, query_ttl, response_ttl,
               fee, query):
@@ -102,6 +106,7 @@ class Oracle:
         response = json.loads(response)
         if response['payload']['result'] == "ok":
             return response['payload']['query_id']
+        self.epoch.wait_for_block()
         return False
 
     def subscribe_query(self, query_id, callback = None):

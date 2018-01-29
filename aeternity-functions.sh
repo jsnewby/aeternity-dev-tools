@@ -3,9 +3,12 @@
 #
 # You just need to set EPOCH_HOME and have a normal config there and
 # the scripts will do the rest for you.
-export AE_LOCAL_PORT=`cat $EPOCH_HOME/epoch.yaml|grep -A1 http: | grep port|awk -F ':' '{print $2}' | sed -s 's/ //g'`
-export AE_LOCAL_INTERNAL_PORT=`cat $EPOCH_HOME/epoch.yaml|grep -A6 http: | grep -A1 internal| grep port|awk -F ':' '{print $2}' | sed -s 's/ //g'`
-export AE_WEBSOCKET=`cat $EPOCH_HOME/epoch.yaml | grep -A3 websocket | grep port|awk -F ':' '{print $2}' | sed -s 's/ //g'`
+function aeupdate_from_epoch_yaml {
+    export AE_LOCAL_PORT=`cat $EPOCH_HOME/epoch.yaml|grep -A1 http: | grep port|awk -F ':' '{print $2}' | sed -s 's/ //g'`
+    export AE_LOCAL_INTERNAL_PORT=`cat $EPOCH_HOME/epoch.yaml|grep -A6 http: | grep -A1 internal| grep port|awk -F ':' '{print $2}' | sed -s 's/ //g'`
+    export AE_WEBSOCKET=`cat $EPOCH_HOME/epoch.yaml | grep -A3 websocket | grep port|awk -F ':' '{print $2}' | sed -s 's/ //g'`
+    export AE_HOST=localhost
+}
 
 alias aepub_key="curl -s http://127.0.0.1:$AE_LOCAL_INTERNAL_PORT/v2/account/pub-key|jq '.pub_key'|sed -e 's/\"//g'"
 alias aeupdate_pub_key="export AE_PUB_KEY=`aepub_key`"

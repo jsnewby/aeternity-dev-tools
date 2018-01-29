@@ -7,7 +7,6 @@ Author: John Newby
 (c) Ape Unit 2018
 """
 
-import asyncio
 import json
 import os
 import time
@@ -37,8 +36,10 @@ class Epoch:
         print(data)
         return int(data['height'])
 
+    def update_top_block(self):
+        self.top_block = self.get_top_block()        
+    
     def wait_for_block(self):
-        self.top_block = self.get_top_block()
         while True:
             time.sleep(self.sleep_period)
             new_block = self.get_top_block()
