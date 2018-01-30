@@ -3,6 +3,23 @@
 #
 # You just need to set EPOCH_HOME and have a normal config there and
 # the scripts will do the rest for you.
+
+# Copyright (c) 2018 aeternity developers
+
+# Permission to use, copy, modify, and/or distribute this software for
+# any purpose with or without fee is hereby granted, provided that the
+# above copyright notice and this permission notice appear in all
+# copies.
+
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+# WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+# AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+# DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA
+# OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+# TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+# PERFORMANCE OF THIS SOFTWARE.
+
 function aeupdate_from_epoch_yaml {
     export AE_LOCAL_PORT=`cat $EPOCH_HOME/epoch.yaml|grep -A1 http: | grep port|awk -F ':' '{print $2}' | sed -s 's/ //g'`
     export AE_LOCAL_INTERNAL_PORT=`cat $EPOCH_HOME/epoch.yaml|grep -A6 http: | grep -A1 internal| grep port|awk -F ':' '{print $2}' | sed -s 's/ //g'`

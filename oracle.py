@@ -4,7 +4,22 @@
 Test oracle client
 Author: John Newby
 
-(c) Ape Unit 2018
+Copyright (c) 2018 aeternity developers
+
+Permission to use, copy, modify, and/or distribute this software for
+any purpose with or without fee is hereby granted, provided that the
+above copyright notice and this permission notice appear in allqq
+copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
+PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+
 """
 
 import asyncio
@@ -62,11 +77,15 @@ class Oracle:
                              "oracle_id": oracle_id }}
         j = json.dumps(query)
         self.websocket.send(j)
-        response = json.loads(self.websocket.recv())
-        print(response)
-        if not response['payload']['result'] == 'ok':
-            raise RuntimeError(response)
-        id = response['payload']['subscribed_to']['oracle_id']
+        while True:
+            response = json.loads(self.websocket.recv())
+            print(response)
+            if response['action'] == 'mined_block':
+                continue
+            if not response['payload']['result'] == 'ok':
+                raise RuntimeError(response)
+            id = response['payload']['subscribed_to']['oracle_id']
+            break
         mining_events = 0
         while True:
             data = self.websocket.recv()
@@ -74,7 +93,7 @@ class Oracle:
             print(j)
             if j['action'] == 'mined_block':
                 mining_events += 1
-                next
+                continue
             if j['action'] == 'new_oracle_query':
                 if callback:
                     callback(j)
@@ -118,18 +137,26 @@ class Oracle:
         j = json.dumps(request)
         print(j)
         self.websocket.send(j)
-        response = self.websocket.recv()
-        response = json.loads(response)
-        print(response)
-        if not response['payload']['result'] == "ok":
-            raise RuntimeError(response)
-        while True:
-            data = self.websocket.recv()
-            data = json.loads(data)
-            print(data)
-            if callback:
-                callback.call(data)
 
+        # check response, might have to consume a block mined message
+        while True:
+            blocks_mined = 0
+            response = self.websocket.recv()
+            response = json.loads(response)
+            print(response)
+            if response['action'] == 'mined_block':
+                blocks_mined += 1
+                continue
+            if response['action'] == 'new_oracle_response':
+                if callback:
+                    callback(response['payload'])
+                else:
+                    print(response['payload'])
+                    break
+            # Should we get here?
+            if not response['payload']['result'] == 'ok':
+                raise RuntimeError(response)
+        
     def respond(self, query_id, fee, reply):
         self.connect_websocket()
         response = {"target": "oracle",
