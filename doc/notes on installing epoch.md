@@ -1,4 +1,6 @@
-# How to install Epoch on Ubuntu
+# How to install an Epoch test network on Ubuntu
+
+Tested on Ubuntu 10.10 and 10.04. This will install a 3-node system for local testing. Optionally you may choose to speed up mining in order to get faster results, and/or restrict mining to one node to make tracking what happens on each node easier.
 
 ## Step 1 -- install ESL Erlang 20 on your system.
 
@@ -11,75 +13,92 @@ sudo apt-get install esl-erlang
 rm erlang-solutions_1.0_all.deb
 ```
 
-## Step 2 -- get the source, and compile it
+## Step 2 -- get the source
 
-```git clone git@github.com:aeternity/epoch.git
+`git clone git@github.com:aeternity/epoch.git`
+
+### Step 2.1 -- speed up block mining (optional)
+
+In the file epoch/apps/aecore/src/aec_governance.erl change the line 
+
+`-define(EXPECTED_BLOCK_MINE_RATE, 300000). %% 60secs * 1000ms * 5 = 300000msecs`
+
+to something like 
+
+`-define(EXPECTED_BLOCK_MINE_RATE, 15000). %% 15secs * 1000ms * 5 = 15000msecs`
+
+before compiling
+
+### Step 2.2 -- mine (you need to do some mining).
+
+the sys.config files under config/dev config/dev2 and config/dev3 describe the behaviour of the 3 test nodes. By default none of the nodes mine. Making dev1 mine enables you to play with spending and see easily what is going on. Change '{autostart, false}' under `aecore` to `true` in config/dev1/sys.config for this behaviour.
+
+## Step 3 Build and run
+
+```
 cd epoch/
-make
+make multi-build
 ```
+This will create a directory \_build under epoch. Under this are dev1/rel/epoch and so forth.
 
-## Step 3 -- edit `accounts.json`
-
-For the Test Net, 
-```
-{
-  "ak$3YGRJv1QMgNbeDzvqX7qJrZWJDaHGmrHYHifxSbhSEgn6anuNYCNPrzsB911xTbZ35bvJYWLyYjrQaQKfvja9gkpvYMfEZ": 100000000001
-}
-```
-
-What goes in here?
-
-## Step 3 -- setup your `epoch.yaml`
-
-Replace the contents of `_build/local/rel/epoch/doc/examples/epoch.yaml` with the following, replacing /var/epoch with the path to your build dir, and peer_address with your external IP address.
+`make multi-start` will start the three. You can ignore the ulimit messages for a network of this size.
 
 ```
----
-peers:
-    - "http://31.13.248.108:3013/"
-
-keys:
-    dir: keys
-    password: "locallocal"
-
-http:
-    external:
-        peer_address: http://139.59.140.51:8095/
-        port: 3003
-    internal:
-        port: 3103
-
-websocket:
-    internal:
-        port: 3104
-
-mining:
-    autostart: true
-
-chain:
-    persist: true
-    db_path: ./mydb
-	```
-	
-## Step 4 -- create directories for key and db
-
-```
-mkdir _build/local/rel/epoch/key _build/local/rel/epoch/mydb
+$ make multi-start
+make[1]: Entering directory '/mnt/sdb1/newby/projects/aeternity/src/epoch'
+WARNING: ulimit -n is 1024; 24576 is the recommended minimum.
+You are recommended to ensure the node is stopped and raise the maximum number of open files (try 'ulimit -n 24576') before starting the node.
+make[1]: Leaving directory '/mnt/sdb1/newby/projects/aeternity/src/epoch'
+make[1]: Entering directory '/mnt/sdb1/newby/projects/aeternity/src/epoch'
+WARNING: ulimit -n is 1024; 24576 is the recommended minimum.
+You are recommended to ensure the node is stopped and raise the maximum number of open files (try 'ulimit -n 24576') before starting the node.
+make[1]: Leaving directory '/mnt/sdb1/newby/projects/aeternity/src/epoch'
+make[1]: Entering directory '/mnt/sdb1/newby/projects/aeternity/src/epoch'
+WARNING: ulimit -n is 1024; 24576 is the recommended minimum.
+You are recommended to ensure the node is stopped and raise the maximum number of open files (try 'ulimit -n 24576') before starting the node.
+make[1]: Leaving directory '/mnt/sdb1/newby/projects/aeternity/src/epoch'
 ```
 
-## Step 5 -- install accounts.json
+It's useful to make 3 scripts to reference the instances:
 
-The file contains the hash of the genesis block, and it is important it matches that of the peer. For the peer above, the file should contain:
+dev1.sh:
+```
+export AE_LOCAL_PORT=3013
+export AE_LOCAL_INTERNAL_PORT=3113
+export AE_WEBSOCKET=3114
+. ~/projects/aeternity/dev-tools/aeternity-functions.sh
+```
+dev2.sh
+```
+export AE_LOCAL_PORT=3023
+export AE_LOCAL_INTERNAL_PORT=3123
+export AE_WEBSOCKET=3124
+. ~/projects/aeternity/dev-tools/aeternity-functions.sh
+```
+dev3.sh
+```
+export AE_LOCAL_PORT=3033
+export AE_LOCAL_INTERNAL_PORT=3133
+export AE_WEBSOCKET=3134
+. ~/projects/aeternity/dev-tools/aeternity-functions.sh
+```
+
+You can now play with æternity:
 
 ```
-{
-   "ak$3YGRJv1QMgNbeDzvqX7qJrZWJDaHGmrHYHifxSbhSEgn6anuNYCNPrzsB911xTbZ35bvJYWLyYjrQaQKfvja9gkpvYMfEZ": 100000000001
-}
+$. ../dev2.sh
+$aepub_key 
+ak$3auB9artUQWFJifbU66LQ9iahEdzTAbmpsC2xfVizRxFnxbiV7KVj2jS572pDG3x8KCcvcTQETivd4BsVBPbv3k8QdfEbC
+$. ../dev1.sh
+$aebalance 
+250
+$aespend-tx 'ak$3auB9artUQWFJifbU66LQ9iahEdzTAbmpsC2xfVizRxFnxbiV7KVj2jS572pDG3x8KCcvcTQETivd4BsVBPbv3k8QdfEbC' 200 1
+{}$balance 
+260
+260
+$aebalance 
+70
+$. ../dev2.sh
+$aebalance 
+200
 ```
-
-If this does not match what the peer is expecting, your node will be blocked, and you'll have to change the peer's address (port number only will do) in order to connect. 
-
-## Troubleshooting
-
-In general, whenever a setting changes it seems that modifying the (address,port) tuple avoids weirdness. Deleting the database directory is also frequently necessary.
-
